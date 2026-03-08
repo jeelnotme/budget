@@ -202,18 +202,6 @@
   <div class="bottom-space"></div>
 
   <script>
-    // SUPABASE CONFIG
-    var SUPABASE_URL = "https://nqckuirytkcpzhypnksb.supabase.co";
-    var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2t1aXJ5dGtjcHpoeXBua3NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTY4NTAsImV4cCI6MjA4ODQ3Mjg1MH0.leSHjg95e_izZLxXyUwyKu0LEEiB8Uq442cTApvxBM0";
-    var TABLE = SUPABASE_URL + "/rest/v1/budget";
-
-    // HEADERS for Supabase API
-    var headers = {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + SUPABASE_KEY
-    };
-
     // load records when page opens
     window.onload = function() {
       loadRecords();
@@ -231,55 +219,34 @@
         return;
       }
 
-      var data = {
+      // get existing records from localStorage
+      var records = JSON.parse(localStorage.getItem("budget") || "[]");
+
+      // add new record with unique id
+      records.push({
+        id: Date.now(),
         type: type,
         category: category,
         amount: parseFloat(amount),
         note: note
-      };
-
-      fetch(TABLE, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data)
-      })
-      .then(function() {
-        document.getElementById("status").innerHTML = " Record saved!";
-        document.getElementById("type").value = "";
-        document.getElementById("category").value = "";
-        document.getElementById("amount").value = "";
-        document.getElementById("note").value = "";
-        loadRecords();
-      })
-      .catch(function(error) {
-        document.getElementById("status").innerHTML = " Error saving record.";
       });
+
+      // save back to localStorage
+      localStorage.setItem("budget", JSON.stringify(records));
+
+      document.getElementById("status").innerHTML = " Record saved!";
+      document.getElementById("type").value = "";
+      document.getElementById("category").value = "";
+      document.getElementById("amount").value = "";
+      document.getElementById("note").value = "";
+
+      loadRecords();
     }
 
-    // READ - load all records from Supabase
+    // READ - load all records from localStorage
     function loadRecords() {
-      fetch(TABLE + "?select=*&order=create_at.desc&apikey=" + SUPABASE_KEY, {
-        method: "GET",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY
-        }
-      })
-      .then(function(response) {
-        return response.json();
-      })
-      .then(function(data) {
-        console.log("Data from Supabase:", data);
-        if (Array.isArray(data)) {
-          renderRecords(data);
-        } else {
-          document.getElementById("recordList").innerHTML = "❌ Error: " + JSON.stringify(data);
-        }
-      })
-      .catch(function(error) {
-        console.log("Fetch error:", error);
-        document.getElementById("recordList").innerHTML = " Error loading records.";
-      });
+      var data = JSON.parse(localStorage.getItem("budget") || "[]");
+      renderRecords(data);
     }
 
     // show records on screen + compute summary
@@ -294,7 +261,7 @@
         list.innerHTML = "<p style='color:#999; font-size:13px;'>No records yet.</p>";
       }
 
-      for (var i = 0; i < data.length; i++) {
+      for (var i = data.length - 1; i >= 0; i--) {
         var item = data[i];
 
         if (item.type == "income") {
@@ -323,24 +290,20 @@
       document.getElementById("totalBalance").innerHTML = "₱" + balance.toLocaleString();
     }
 
-    // DELETE - remove record from Supabase
-    // FIX: added separate headers with Prefer: return=minimal
+    // DELETE - remove record from localStorage
     function deleteRecord(id) {
-      fetch(TABLE + "?id=eq." + id, {
-        method: "DELETE",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY,
-          "Prefer": "return=minimal"
+      var records = JSON.parse(localStorage.getItem("budget") || "[]");
+
+      var updated = [];
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].id != id) {
+          updated.push(records[i]);
         }
-      })
-      .then(function() {
-        document.getElementById("status").innerHTML = " Record deleted!";
-        loadRecords();
-      })
-      .catch(function(error) {
-        document.getElementById("status").innerHTML = " Error deleting record.";
-      });
+      }
+
+      localStorage.setItem("budget", JSON.stringify(updated));
+      document.getElementById("status").innerHTML = " Record deleted!";
+      loadRecords();
     }
 
     // SERVICE WORKER
