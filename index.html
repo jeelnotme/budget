@@ -4,24 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Budget Tracker</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1a237e" />
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       background-color: #e8eaf6;
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
     }
 
     .header {
       background-color: #1a237e;
       color: white;
       padding: 15px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
       font-size: 20px;
       font-weight: bold;
+    }
+
+    .header img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .header h2 {
+      font-size: 20px;
+      margin: 0;
     }
 
     .summary {
@@ -113,9 +129,7 @@
       font-size: 14px;
     }
 
-    .record-item .info {
-      flex: 1;
-    }
+    .record-item .info { flex: 1; }
 
     .record-item .info span {
       display: block;
@@ -153,10 +167,10 @@
 <body>
 
   <!-- HEADER -->
-  <div class="header d-flex justify-content-center align-items-center">
-  <img src="icon-192.png" width="40" height="40" class="me-2" alt="Budget Tracker">
-  <h2 class="mb-0">Budget Tracker</h2>
-</div>
+  <div class="header">
+    <img src="icon-192.png" alt="Budget Tracker">
+    <h2>Budget Tracker</h2>
+  </div>
 
   <!-- SUMMARY BOXES -->
   <div class="summary">
@@ -176,7 +190,7 @@
 
   <!-- ADD FORM -->
   <div class="form-section">
-    <h6> Add Record</h6>
+    <h6>Add Record</h6>
 
     <select id="type">
       <option value="">-- Type --</option>
@@ -195,7 +209,7 @@
 
   <!-- RECORDS LIST -->
   <div class="records-section">
-    <h6> Records</h6>
+    <h6>Records</h6>
     <div id="recordList">Loading...</div>
   </div>
 
@@ -215,7 +229,7 @@
       var note = document.getElementById("note").value.trim();
 
       if (type == "" || category == "" || amount == "") {
-        document.getElementById("status").innerHTML = " Please fill type, category and amount!";
+        document.getElementById("status").innerHTML = "⚠️ Please fill type, category and amount!";
         return;
       }
 
@@ -234,7 +248,7 @@
       // save back to localStorage
       localStorage.setItem("budget", JSON.stringify(records));
 
-      document.getElementById("status").innerHTML = " Record saved!";
+      document.getElementById("status").innerHTML = "✅ Record saved!";
       document.getElementById("type").value = "";
       document.getElementById("category").value = "";
       document.getElementById("amount").value = "";
@@ -302,7 +316,7 @@
       }
 
       localStorage.setItem("budget", JSON.stringify(updated));
-      document.getElementById("status").innerHTML = " Record deleted!";
+      document.getElementById("status").innerHTML = "🗑️ Record deleted!";
       loadRecords();
     }
 
